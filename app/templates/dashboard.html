@@ -1,0 +1,376 @@
+{% extends "base.html" %}
+{% block title %}Дашборд — {{ APP_NAME }}{% endblock %}
+{% block body_attrs %} data-dashboard data-effective-hours="{{ progress.effective_hours }}" data-streak-hours="{{ progress.current_streak_hours }}" data-quit-utc="{{ profile.quit_at | iso_utc }}"{% endblock %}
+
+{% block content %}
+{% set report_json = report_json %}
+
+{% if welcome %}
+  <div class="alert alert--ok" role="status">
+    <strong>Готово!</strong> Таймер запущен, анатомическая схема настроена под ваш анамнез.
+    Нажимайте на органы — там подробные таймлайны и источники.
+  </div>
+{% endif %}
+
+{% if lapse_flash %}
+  <div class="alert alert--warn" role="status">
+    <strong>Это часть пути, и прогресс никуда не делся.</strong>
+    {% if lapse_keep_pct is not none %}
+      Ваш общий индекс восстановления сохранился на <strong>{{ lapse_keep_pct }}%</strong>{% if lapse_label %} ({{ lapse_label }}){% endif %}.
+      Тело не «обнуляется»: клетки, которые уже восстановились, остались восстановленными.
+    {% endif %}
+    Продолжаем с сегодняшнего дня.
+  </div>
+{% endif %}
+
+<!-- ================= Hero: таймер и общий индекс ================= -->
+<section class="hero" aria-labelledby="timer-heading">
+  <div>
+    <div class="hero__eyebrow" id="timer-heading">
+      {% if progress.lapse_count %}
+        Текущая серия без никотина
+      {% else %}
+        Без никотина уже
+      {% endif %}
+    </div>
+    <p class="hero__timer mono" style="margin:0.2rem 0 0" data-timer="streak"
+       aria-live="off" aria-label="Текущая серия без никотина">
+      <span><span class="unit">д</span><span data-unit="days">{{ progress.current_streak_hours | int // 24 }}</span></span>
+      <span><span class="unit">ч</span><span data-unit="hours">{{ (progress.current_streak_hours | int % 24) }}</span></span>
+      <span><span class="unit">м</span><span data-unit="minutes">{{ ((progress.current_streak_hours * 60) | int % 60) }}</span></span>
+      <span><span class="unit">с</span><span data-unit="seconds">0</span></span>
+    </p>
+    <p class="hero__sub">
+      Эквивалентное чистое время, по которому считается восстановление:
+      <strong data-timer-text="effective">{{ progress.effective_hours | duration }}</strong>.
+      {% if progress.lapse_count %}
+        Учтено срывов: {{ progress.lapse_count }} — прогресс сохранён на
+        {{ progress.last_lapse_retained_pct | round | int }}%.
+      {% endif %}
+    </p>
+    <div class="row" style="margin-top:0.8rem">
+      <span class="pill" style="background:var(--phase-soft);color:var(--phase-color)">
+        {{ report.phase.emoji }} <span data-phase-label>{{ report.phase.label }}</span>
+      </span>
+      <span class="pill pill--sky">скорость восстановления ×{{ report.speed_factor | round(2) }}</span>
+      <span class="pill pill--mint">самый быстрый модуль: {{ report.strongest.short }} {{ report.strongest.percent_int }}%</span>
+    </div>
+  </div>
+
+  <div class="ring" data-ring
+       role="img"
+       aria-label="Общий индекс восстановления: {{ report.percent_int }} процентов">
+    <svg viewBox="0 0 120 120" width="132" height="132" aria-hidden="true">
+      <circle class="ring__track" cx="60" cy="60" r="52" fill="none" stroke-width="11"></circle>
+      <circle class="ring__value" cx="60" cy="60" r="52" fill="none" stroke-width="11"
+              stroke="{{ report.phase.color }}"
+              stroke-dasharray="326.7"
+              stroke-dashoffset="{{ 326.7 - (326.7 * report.percent / 100) }}"
+              data-ring-value></circle>
+    </svg>
+    <div class="ring__label">
+      <span class="ring__num" data-overall-percent>{{ report.percent_int }}%</span>
+      <span class="ring__cap">восстановление</span>
+    </div>
+  </div>
+</section>
+
+<p class="soft" style="margin:0.7rem 0 1.2rem">{{ report.phase.description }}</p>
+
+<!-- ================= Быстрые действия ================= -->
+<section class="grid grid-4" style="margin-bottom:1.2rem">
+  <a class="card" href="/checkin" style="text-decoration:none;color:inherit">
+    <div class="stat__label">Ежедневный чек-ин</div>
+    <div class="card__title" style="margin-top:0.2rem">
+      {% if today_checkin %}Отмечено на сегодня ✓{% else %}Заполнить за 20 секунд →{% endif %}
+    </div>
+    <p class="stat__hint" style="margin:0.25rem 0 0">
+      {% if today_checkin %}
+        Настроение {{ today_checkin.mood }}/10, тяга {{ today_checkin.craving }}/10, сон {{ today_checkin.sleep_hours }} ч.
+      {% else %}
+        Настроение, тяга, сон, вода и активность.
+      {% endif %}
+    </p>
+  </a>
+
+  <a class="card" href="/breathing" style="text-decoration:none;color:inherit">
+    <div class="stat__label">Острая тяга?</div>
+    <div class="card__title" style="margin-top:0.2rem">Дыхание 4-7-8 →</div>
+    <p class="stat__hint" style="margin:0.25rem 0 0">2 минуты, чтобы переждать волну тяги.</p>
+  </a>
+
+  <div class="card">
+    <div class="stat__label">Вода сегодня</div>
+    <div class="card__title" style="margin-top:0.2rem">
+      {{ today_checkin.water_glasses if today_checkin else 0 }} / 8 стаканов
+    </div>
+    <div class="bar" style="margin-top:0.45rem">
+      <div class="bar__fill" style="width: {{ ((today_checkin.water_glasses if today_checkin else 0) / 8 * 100) | round | int }}%"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stat__label">Ближайший рубеж</div>
+    {% set nearest = next_events[0] if next_events else none %}
+    {% if nearest %}
+      {% set st, ms, eta, hrs = nearest %}
+      <div class="card__title" style="margin-top:0.2rem">{{ st.emoji }} {{ ms.title }}</div>
+      <p class="stat__hint" style="margin:0.25rem 0 0">
+        через {{ hrs | duration }} · {{ ms.percent }}% по модулю «{{ st.short }}»
+      </p>
+    {% else %}
+      <div class="card__title" style="margin-top:0.2rem">Все рубежи пройдены 🎉</div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ================= Карта тела и модули ================= -->
+<section class="card" style="margin-bottom:1.2rem">
+  <div class="card__head">
+    <h2 class="card__title">Анатомическая схема</h2>
+    <span class="card__hint">Нажмите на орган — откроется подробный таймлайн</span>
+  </div>
+
+  <div class="body-panel">
+    <div class="body-stage is-scanning" data-body-stage>
+      {% include "partials/body_svg.html" %}
+      <p class="center muted" style="font-size:0.82rem;margin:0.3rem 0 0">
+        Цвет органа соответствует фазе: 🔴 0–7 дней · 🟠 1–4 недели · 🟡 1–6 месяцев · 🟢 6+ месяцев
+      </p>
+    </div>
+
+    <div>
+      <div class="organ-list" role="list">
+        {% for o in report.anatomy %}
+          <button type="button" class="organ-row phase-{{ o.phase.key }}" role="listitem"
+                  data-organ-open="{{ o.key }}" aria-haspopup="dialog">
+            <span class="organ-row__emoji" aria-hidden="true">{{ o.emoji }}</span>
+            <span>
+              <span class="organ-row__name">{{ o.name }}</span>
+              <span class="organ-row__meta">{{ o.phase.emoji }} {{ o.phase.label }}
+                {%- if o.upcoming %} · далее: {{ o.upcoming.title }}{% endif %}</span>
+              <span class="bar" style="display:block"><span class="bar__fill" style="display:block;width: {{ o.percent_int }}%" data-organ-bar="{{ o.key }}"></span></span>
+            </span>
+            <span class="organ-row__pct" data-organ-percent="{{ o.key }}">{{ o.percent_int }}%</span>
+          </button>
+        {% endfor %}
+      </div>
+
+      <h3 style="margin-top:1.1rem">Системные модули</h3>
+      <div class="organ-list" role="list">
+        {% for o in report.systems %}
+          <button type="button" class="organ-row phase-{{ o.phase.key }}" role="listitem"
+                  data-organ-open="{{ o.key }}" aria-haspopup="dialog">
+            <span class="organ-row__emoji" aria-hidden="true">{{ o.emoji }}</span>
+            <span>
+              <span class="organ-row__name">{{ o.name }}</span>
+              <span class="organ-row__meta">{{ o.phase.emoji }} {{ o.phase.label }}</span>
+              <span class="bar" style="display:block"><span class="bar__fill" style="display:block;width: {{ o.percent_int }}%" data-organ-bar="{{ o.key }}"></span></span>
+            </span>
+            <span class="organ-row__pct" data-organ-percent="{{ o.key }}">{{ o.percent_int }}%</span>
+          </button>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= Уведомления и достижения ================= -->
+<section class="grid grid-2" style="margin-bottom:1.2rem">
+  <div class="card">
+    <div class="card__head">
+      <h2 class="card__title">Что важно сейчас</h2>
+      <span class="card__hint">{{ notifications | length }} сообщений</span>
+    </div>
+    <div class="notif">
+      {% for n in notifications %}
+        <div class="notif__item notif__item--{{ n.kind }}">
+          <span class="notif__icon" aria-hidden="true">
+            {%- if n.kind == 'warning' %}⚠️{% elif n.kind == 'motivational' %}🎉{% else %}💡{% endif -%}
+          </span>
+          <span>
+            <span class="notif__title">{{ n.title }}</span>
+            <span class="notif__body" style="display:block">{{ n.body }}</span>
+            {% if n.action %}<a class="notif__action" href="{{ n.action_href }}">{{ n.action }} →</a>{% endif %}
+          </span>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card__head">
+      <h2 class="card__title">Достижения</h2>
+      <span class="card__hint">открыто {{ unlocked_count }} из {{ achievements | length }}</span>
+    </div>
+    <div class="badges" role="list">
+      {% for a in achievements %}
+        <div class="badge {% if a.unlocked %}is-unlocked{% endif %}" role="listitem"
+             title="{{ a.title }} — {{ a.detail }}">
+          <span class="badge__emoji" aria-hidden="true">{{ a.emoji }}</span>
+          <span class="badge__title">{{ a.title }}</span>
+          {% if a.unlocked %}
+            <span class="badge__progress">получено</span>
+          {% else %}
+            <span class="badge__progress">{{ (a.progress * 100) | round | int }}%</span>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="card" style="margin-bottom:1.2rem">
+  <div class="card__head">
+    <h2 class="card__title">Замена ритуала</h2>
+    <span class="card__hint">вейпинг — это ещё и «рука ко рту»</span>
+  </div>
+  <p class="soft" style="font-size:0.9rem">
+    Никотин уходит за 72 часа, а автоматизированная привычка «рука ко рту» — за 30–90 дней.
+    Вот чем занять руки и рот, чтобы не подменять никотин.
+  </p>
+  <div class="habit-list">
+    {% for h in habit_replacements %}
+      <div class="habit">
+        <div class="habit__title">{{ h.title }} <span class="pill">{{ h.tag }}</span></div>
+        <div class="habit__detail">{{ h.detail }}</div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ================= Динамика тяги и настроения ================= -->
+<section class="card" style="margin-bottom:1.2rem">
+  <div class="card__head">
+    <h2 class="card__title">Динамика тяги, настроения и сна</h2>
+    <span class="card__hint">последние 21 день</span>
+  </div>
+  <div class="legend" style="margin-bottom:0.5rem">
+    <span class="legend__key"><span class="legend__swatch" style="background:var(--phase-regeneration)"></span> Тяга (1–10)</span>
+    <span class="legend__key"><span class="legend__swatch" style="background:var(--sky)"></span> Настроение (1–10)</span>
+    <span class="legend__key"><span class="legend__swatch" style="background:#dbe9f2;height:9px;border-radius:3px"></span> Сон (часы, фон)</span>
+  </div>
+  <div data-chart-host>
+    <svg class="chart" viewBox="0 0 720 200" role="img"
+         aria-label="График динамики тяги и настроения за последние 21 день"></svg>
+  </div>
+  <script type="application/json" data-chart-data>{{ chart_rows | tojson }}</script>
+  <p class="muted" style="font-size:0.85rem;margin:0.6rem 0 0">
+    Незаполненные дни на графике пропущены — это нормально, данные не выдумываются.
+    Заполните <a href="/checkin">чек-ин</a>, чтобы появилась точка.
+  </p>
+</section>
+
+<!-- ================= Что дальше ================= -->
+<section class="grid grid-2" style="margin-bottom:1.2rem">
+  <div class="card">
+    <div class="card__head">
+      <h2 class="card__title">Что будет дальше</h2>
+      <span class="card__hint">ближайшие рубежи</span>
+    </div>
+    <ol class="timeline">
+      {% for st, ms, eta, hrs in next_events %}
+        <li class="{% if loop.first %}is-next{% endif %}">
+          <div class="timeline__when">{{ st.emoji }} {{ st.short }} · через {{ hrs | duration }}</div>
+          <div class="timeline__title">{{ ms.title }}</div>
+          <div class="soft" style="font-size:0.89rem">{{ ms.detail }}</div>
+        </li>
+      {% endfor %}
+    </ol>
+  </div>
+
+  <div class="card">
+    <div class="card__head">
+      <h2 class="card__title">Прогноз на 7 дней</h2>
+      <span class="card__hint">по каждому модулю</span>
+    </div>
+    <table class="data">
+      <thead>
+        <tr><th scope="col">Модуль</th><th scope="col">Сейчас</th><th scope="col">Через неделю</th></tr>
+      </thead>
+      <tbody>
+        {% for row in forecast %}
+          {% set o = row.organ %}
+          <tr class="phase-{{ o.phase.key }}">
+            <th scope="row" style="text-transform:none;letter-spacing:0">
+              <a href="/organ/{{ o.key }}">{{ o.emoji }} {{ o.name }}</a>
+            </th>
+            <td class="mono">{{ o.percent_int }}%</td>
+            <td class="mono" style="color:var(--phase-color)">{{ row.next_week | round | int }}%</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= Срыв ================= -->
+<section class="card card--tint" style="margin-bottom:1.2rem">
+  <div class="row-between">
+    <div style="max-width:60ch">
+      <h2 class="card__title">Если сорвались</h2>
+      <p class="soft" style="margin:0.3rem 0 0">
+        Одна затяжка — не повод начинать заново. Мы не обнуляем прогресс: уже восстановившиеся
+        клетки остаются восстановившимися. Отметьте честно, и приложение мягко пересчитает таймлайн.
+      </p>
+    </div>
+    <button class="btn btn-warn" type="button" data-lapse-open>Я сорвался</button>
+  </div>
+</section>
+
+<!-- ================= Медицинский дисклеймер ================= -->
+<details class="disclosure">
+  <summary>Медицинский дисклеймер и методология расчёта</summary>
+  <p class="soft">{{ MEDICAL_DISCLAIMER }}</p>
+  <p class="soft">
+    Проценты восстановления рассчитываются монотонной интерполяцией опорных точек в
+    логарифмическом времени. Опорные точки взяты из опубликованных сроков (ВОЗ, CDC, NHS, AHA)
+    и адаптированы под вейпинг: отсутствие угарного газа и смол означает более быстрый спад
+    воспаления дыхательных путей, но никотиновое повреждение эндотелия и зависимость требуют
+    тех же недель и месяцев.
+  </p>
+  <p class="soft" style="margin:0">
+    Персональный коэффициент скорости восстановления — {{ report.speed_factor | round(2) }}
+    {%- if report.speed_notes %} ({{ report.speed_notes | join('; ') }}){% endif %}.
+    Итоговый индекс — взвешенное среднее по модулям.
+  </p>
+</details>
+
+<!-- ================= Диалоги ================= -->
+<dialog id="lapse-dialog" class="dialog" aria-labelledby="lapse-dialog-title">
+  <div class="dialog__body">
+    <button type="button" class="dialog__close" data-lapse-close aria-label="Закрыть">✕</button>
+    <h2 id="lapse-dialog-title" style="margin-top:0">Это часть пути</h2>
+    <p class="soft">
+      Спасибо за честность — она важнее идеальной статистики. Выберите, что произошло:
+      приложение пересчитает таймлайн мягко и покажет, сколько прогресса сохранилось.
+    </p>
+    <form method="post" action="/lapse">
+      <fieldset>
+        <legend>Что случилось</legend>
+        <div class="stack">
+          {% for value, label in LAPSE_SEVERITIES %}
+            <label class="check">
+              <input type="radio" name="severity" value="{{ value }}" {% if value == 'episode' %}checked{% endif %}>
+              <span>{{ label }}</span>
+            </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+      <label class="field">
+        <span class="field__label">Заметка <span class="muted">(необязательно)</span></span>
+        <textarea name="note" placeholder="Что стало триггером? Это поможет в следующий раз."></textarea>
+      </label>
+      <div class="row">
+        <button class="btn btn-primary" type="submit">Продолжить с сегодняшнего дня</button>
+        <button class="btn btn-ghost" type="button" data-lapse-close>Отмена</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/body-map.js" defer></script>
+<script src="/static/js/charts.js" defer></script>
+{% endblock %}

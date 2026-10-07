@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Вход — {{ APP_NAME }}{% endblock %}
+
+{% block content %}
+<div class="wrap-narrow" style="margin-inline:auto">
+  <div class="card">
+    <h1>Вход</h1>
+    <p class="soft">Войдите, чтобы продолжить отслеживать восстановление.</p>
+
+    {% if errors %}
+      <div class="alert alert--error" role="alert">
+        <ul style="margin:0;padding-left:1.1rem">
+          {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <form method="post" action="/login" novalidate>
+      <input type="hidden" name="next" value="{{ next or '/' }}">
+
+      <label class="field">
+        <span class="field__label">Электронная почта</span>
+        <input type="email" name="email" value="{{ email or '' }}" autocomplete="email" required>
+      </label>
+
+      <label class="field">
+        <span class="field__label">Пароль</span>
+        <input type="password" name="password" autocomplete="current-password" required>
+      </label>
+
+      <button class="btn btn-primary btn-block" type="submit">Войти</button>
+    </form>
+
+    <p class="muted" style="margin-top:1rem">
+      Нет аккаунта? <a href="/register">Зарегистрируйтесь</a> — это займёт минуту.
+    </p>
+  </div>
+</div>
+{% endblock %}

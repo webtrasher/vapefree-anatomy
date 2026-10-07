@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}Настройки — {{ APP_NAME }}{% endblock %}
+
+{% block content %}
+<h1>Настройки и анамнез</h1>
+<p class="soft">
+  Изменения анамнеза пересчитывают персональный коэффициент скорости восстановления.
+  Таймер при этом не сбрасывается.
+</p>
+
+{% if saved %}
+  <div class="alert alert--ok" role="status">Изменения сохранены, прогноз пересчитан.</div>
+{% endif %}
+
+<section class="grid grid-2">
+  <div class="card">
+    <h2 class="card__title">Текущий коэффициент</h2>
+    <p style="font-size:2rem;font-weight:700;margin:0.3rem 0;color:var(--mint)">
+      ×{{ factors.speed_factor | round(2) }}
+    </p>
+    <p class="soft">Больше 1 — восстановление идёт быстрее среднего, меньше 1 — медленнее.</p>
+    {% if factors.speed_notes %}
+      <ul class="soft">
+        {% for note in factors.speed_notes %}<li>{{ note }}</li>{% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted" style="margin:0">Ваш анамнез не содержит факторов, заметно меняющих скорость.</p>
+    {% endif %}
+    <div class="kv" style="margin-top:0.8rem">
+      <dt>Оценка дозы</dt><dd>{{ factors.daily_nicotine_mg | round(1) }} мг никотина в сутки</dd>
+      <dt>ИМТ</dt><dd>{{ profile.bmi if profile and profile.bmi else '— не рассчитан' }}</dd>
+      <dt>Старт таймера</dt><dd>{{ profile.quit_at.strftime('%d.%m.%Y %H:%M') if profile else '—' }} UTC</dd>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="card__title">История срывов</h2>
+    {% if lapses %}
+      <p class="soft">
+        Срывы не обнуляют прогресс: каждый умножает накопленное чистое время на
+        коэффициент, но не опускает его ниже 65% от достигнутого максимума.
+      </p>
+      <table class="data">
+        <thead><tr><th scope="col">Когда</th><th scope="col">Что было</th><th scope="col"></th></tr></thead>
+        <tbody>
+          {% for l in lapses %}
+            <tr>
+              <th scope="row" style="text-transform:none;letter-spacing:0">
+                {{ l.occurred_at.strftime('%d.%m.%Y %H:%M') }}
+              </th>
+              <td>
+                {{ l.severity }}
+                {% if l.note %}<br><span class="muted">{{ l.note }}</span>{% endif %}
+              </td>
+              <td>
+                <form method="post" action="/lapse/{{ l.id }}/delete">
+                  <button class="btn btn-ghost btn-sm" type="submit">Удалить</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="soft" style="margin:0">Срывов не отмечено. Если сорвётесь — просто нажмите «Я сорвался» на дашборде.</p>
+    {% endif %}
+  </div>
+</section>
+
+<form method="post" action="/settings" class="card" style="margin-top:1.2rem">
+  <h2 class="card__title">Анамнез</h2>
+
+  <label class="field" style="max-width:420px">
+    <span class="field__label">Как к вам обращаться</span>
+    <input type="text" name="display_name" value="{{ user.display_name or '' }}" maxlength="120">
+  </label>
+
+  <div class="grid grid-3">
+    <label class="field">
+      <span class="field__label">Стаж вейпинга, лет</span>
+      <input type="number" name="vape_years" step="0.5" min="0" max="60" value="{{ profile.vape_years if profile else 0 }}">
+    </label>
+    <label class="field">
+      <span class="field__label">Картриджей в день</span>
+      <input type="number" name="pods_per_day" step="0.5" min="0" max="30" value="{{ profile.pods_per_day if profile else 0 }}">
+    </label>
+    <label class="field">
+      <span class="field__label">Крепость, мг/мл</span>
+      <input type="number" name="nicotine_strength" step="1" min="0" max="60" value="{{ profile.nicotine_strength if profile else 20 }}">
+    </label>
+    <label class="field">
+      <span class="field__label">Тип никотина</span>
+      <select name="nicotine_type">
+        {% for value, label in NICOTINE_TYPES %}
+          <option value="{{ value }}" {% if profile and profile.nicotine_type == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field">
+      <span class="field__label">Возраст</span>
+      <input type="number" name="age" min="10" max="110" value="{{ profile.age if profile and profile.age else '' }}">
+    </label>
+    <label class="field">
+      <span class="field__label">Пол</span>
+      <select name="sex">
+        <option value="">Не указывать</option>
+        {% for value, label in SEX_OPTIONS %}
+          <option value="{{ value }}" {% if profile and profile.sex == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field">
+      <span class="field__label">Рост, см</span>
+      <input type="number" name="height_cm" min="100" max="230" step="0.5" value="{{ profile.height_cm if profile and profile.height_cm else '' }}">
+    </label>
+    <label class="field">
+      <span class="field__label">Вес, кг</span>
+      <input type="number" name="weight_kg" min="25" max="300" step="0.5" value="{{ profile.weight_kg if profile and profile.weight_kg else '' }}">
+    </label>
+    <label class="field">
+      <span class="field__label">Активность</span>
+      <select name="activity">
+        {% for value, label in ACTIVITY_LEVELS %}
+          <option value="{{ value }}" {% if profile and profile.activity == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  </div>
+
+  <fieldset>
+    <legend>Хронические заболевания</legend>
+    <div class="checkbox-grid">
+      {% set selected = profile.chronic_conditions if profile else [] %}
+      {% for value, label in CHRONIC_CONDITIONS %}
+        <label class="check">
+          <input type="checkbox" name="chronic" value="{{ value }}" {% if value in selected %}checked{% endif %}>
+          <span>{{ label }}</span>
+        </label>
+      {% endfor %}
+    </div>
+  </fieldset>
+
+  <button class="btn btn-primary" type="submit">Сохранить и пересчитать</button>
+</form>
+
+<section class="card card--tint" style="margin-top:1.2rem">
+  <h2 class="card__title">Уведомления</h2>
+  <p class="soft">
+    Приложение формирует мотивационные и предупреждающие сообщения на дашборде на основе ваших данных:
+    поздравления при пройденных рубежах и подсказки при высокой тяге, низком настроении, коротком сне
+    или нехватке воды.
+  </p>
+  <div class="row">
+    <button class="btn btn-sky" type="button" data-enable-notifications>Разрешить системные уведомления</button>
+    <span class="muted" data-notification-status>Статус: не запрошено</span>
+  </div>
+</section>
+
+<section class="card" style="margin-top:1.2rem;border-color:#eccfcf">
+  <h2 class="card__title" style="color:#8d5353">Опасная зона</h2>
+  <p class="soft">
+    «Начать заново» полностью сбрасывает таймер и удаляет историю срывов. Используйте только если
+    хотите вести отсчёт с чистого листа — для обычного срыва есть кнопка «Я сорвался».
+  </p>
+  <form method="post" action="/restart" data-confirm="Точно сбросить таймер и удалить историю срывов?">
+    <button class="btn btn-warn" type="submit">Сбросить таймер и начать заново</button>
+  </form>
+</section>
+{% endblock %}

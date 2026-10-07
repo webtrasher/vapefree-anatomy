@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ status.name }} — {{ APP_NAME }}{% endblock %}
+
+{% block content %}
+<p style="margin-top:0"><a href="/dashboard">← Вернуться на дашборд</a></p>
+
+<div class="grid" style="grid-template-columns:minmax(0,1fr);gap:1rem">
+  <div class="card">
+    {% include "partials/organ_card.html" %}
+  </div>
+
+  <div class="card card--tint">
+    <h3>Перейти к другим модулям</h3>
+    <div class="organ-list">
+      {% for o in report.organs %}
+        {% if o.key != status.key %}
+          <a class="organ-row phase-{{ o.phase.key }}" href="/organ/{{ o.key }}">
+            <span class="organ-row__emoji" aria-hidden="true">{{ o.emoji }}</span>
+            <span>
+              <span class="organ-row__name">{{ o.name }}</span>
+              <span class="organ-row__meta">{{ o.phase.emoji }} {{ o.phase.label }}</span>
+            </span>
+            <span class="organ-row__pct">{{ o.percent_int }}%</span>
+          </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

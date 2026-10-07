@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Анкета — {{ APP_NAME }}{% endblock %}
+
+{% block content %}
+<div class="wrap-narrow" style="margin-inline:auto">
+  <div class="card">
+    <div class="row-between" style="margin-bottom:0.4rem">
+      <h1 style="margin:0">Короткая анкета</h1>
+      <span class="pill pill--sky">3 шага · ~1 минута</span>
+    </div>
+    <p class="soft">
+      Ответы нужны, чтобы рассчитать персональную скорость восстановления. Пункты про возраст,
+      ИМТ и хронические заболевания — необязательные: они лишь корректируют прогноз.
+    </p>
+
+    <div class="step-dots" data-step-dots aria-hidden="true">
+      <span class="step-dot is-active"></span><span class="step-dot"></span><span class="step-dot"></span>
+    </div>
+
+    <form method="post" action="/onboarding" data-stepper>
+      <input type="hidden" name="tz_offset" value="0" data-tz-offset>
+      <input type="hidden" name="step" value="1">
+
+      <fieldset data-step="1">
+        <legend>Шаг 1. Точка отсчёта</legend>
+        <label class="field">
+          <span class="field__label">Дата и время последней затяжки</span>
+          <input type="datetime-local" name="quit_at_local" required
+                 data-default-utc="{{ quit_at_utc | iso_utc if quit_at_utc else '' }}">
+          <span class="field__hint">
+            От этой точки считается таймер. Если не помните точно — поставьте примерное время:
+            точность до часа на результат почти не влияет.
+          </span>
+        </label>
+      </fieldset>
+
+      <fieldset data-step="2" hidden>
+        <legend>Шаг 2. Стаж и доза никотина</legend>
+        <div class="grid grid-2">
+          <label class="field">
+            <span class="field__label">Стаж вейпинга, лет</span>
+            <input type="number" name="vape_years" step="0.5" min="0" max="60"
+                   value="{{ profile.vape_years if profile and profile.vape_years else '' }}" placeholder="например 2.5">
+          </label>
+          <label class="field">
+            <span class="field__label">Картриджей / заправок в день</span>
+            <input type="number" name="pods_per_day" step="0.5" min="0" max="30"
+                   value="{{ profile.pods_per_day if profile and profile.pods_per_day else '' }}" placeholder="например 1">
+          </label>
+          <label class="field">
+            <span class="field__label">Объём картриджа, мл</span>
+            <input type="number" name="pod_volume_ml" step="0.5" min="0.5" max="30"
+                   value="{{ profile.pod_volume_ml if profile else 2 }}" placeholder="2">
+            <span class="field__hint">Стандартный pod — 2 мл, одноразка — 5–15 мл.</span>
+          </label>
+          <label class="field">
+            <span class="field__label">Крепость никотина, мг/мл</span>
+            <input type="number" name="nicotine_strength" step="1" min="0" max="60"
+                   value="{{ profile.nicotine_strength if profile else 20 }}" placeholder="20">
+            <span class="field__hint">Солевой обычно 20–50 мг/мл, щелочной 3–18 мг/мл.</span>
+          </label>
+        </div>
+        <label class="field">
+          <span class="field__label">Тип никотина</span>
+          <select name="nicotine_type">
+            {% for value, label in NICOTINE_TYPES %}
+              <option value="{{ value }}" {% if profile and profile.nicotine_type == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      </fieldset>
+
+      <fieldset data-step="3" hidden>
+        <legend>Шаг 3. Базовые параметры <span class="muted">(необязательно)</span></legend>
+        <div class="grid grid-3">
+          <label class="field">
+            <span class="field__label">Возраст, лет</span>
+            <input type="number" name="age" min="10" max="110" value="{{ profile.age if profile and profile.age else '' }}">
+          </label>
+          <label class="field">
+            <span class="field__label">Рост, см</span>
+            <input type="number" name="height_cm" min="100" max="230" step="0.5"
+                   value="{{ profile.height_cm if profile and profile.height_cm else '' }}">
+          </label>
+          <label class="field">
+            <span class="field__label">Вес, кг</span>
+            <input type="number" name="weight_kg" min="25" max="300" step="0.5"
+                   value="{{ profile.weight_kg if profile and profile.weight_kg else '' }}">
+          </label>
+        </div>
+
+        <label class="field">
+          <span class="field__label">Пол</span>
+          <select name="sex">
+            <option value="">Не указывать</option>
+            {% for value, label in SEX_OPTIONS %}
+              <option value="{{ value }}" {% if profile and profile.sex == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Физическая активность</span>
+          <select name="activity">
+            {% for value, label in ACTIVITY_LEVELS %}
+              <option value="{{ value }}" {% if profile and profile.activity == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <fieldset>
+          <legend>Хронические заболевания</legend>
+          <p class="field__hint" style="margin-top:0">
+            Отметьте, если есть. Это замедляет прогноз восстановления — приложение станет честнее, а не строже.
+          </p>
+          <div class="checkbox-grid">
+            {% set selected = profile.chronic_conditions if profile else [] %}
+            {% for value, label in CHRONIC_CONDITIONS %}
+              <label class="check">
+                <input type="checkbox" name="chronic" value="{{ value }}" {% if value in selected %}checked{% endif %}>
+                <span>{{ label }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </fieldset>
+      </fieldset>
+
+      <div class="row-between" style="margin-top:0.5rem">
+        <button type="button" class="btn btn-ghost" data-step-prev hidden>Назад</button>
+        <div class="row" style="margin-left:auto">
+          <button type="button" class="btn btn-sky" data-step-next>Далее</button>
+          <button type="submit" class="btn btn-primary" data-step-submit>Показать мой дашборд</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="card card--tint" style="margin-top:1rem">
+    <h3>Медицинский дисклеймер</h3>
+    <p class="soft" style="margin:0">{{ MEDICAL_DISCLAIMER }}</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/onboarding.js" defer></script>
+{% endblock %}

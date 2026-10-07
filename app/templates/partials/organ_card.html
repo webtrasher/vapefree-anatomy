@@ -1,0 +1,111 @@
+{# Карточка модуля органа: используется и в модальном окне, и на отдельной странице. #}
+<article class="phase-{{ status.phase.key }}" data-organ-card="{{ status.key }}">
+  <header class="row-between" style="align-items:flex-start">
+    <div>
+      <div class="row" style="gap:0.5rem">
+        <span style="font-size:1.6rem" aria-hidden="true">{{ status.emoji }}</span>
+        <h2 id="organ-dialog-title" style="margin:0">{{ status.name }}</h2>
+      </div>
+      <p class="soft" style="margin:0.35rem 0 0">{{ status.headline }}</p>
+    </div>
+    <div class="center" style="min-width:92px">
+      <div style="font-size:2.1rem;font-weight:700;line-height:1;color:var(--phase-color)"
+           data-organ-percent="{{ status.key }}">{{ status.percent_int }}%</div>
+      <div class="muted" style="font-size:0.78rem;text-transform:uppercase;letter-spacing:0.04em">восстановлено</div>
+    </div>
+  </header>
+
+  <div class="row" style="gap:0.4rem;margin:0.75rem 0 0.5rem">
+    <span class="pill">{{ status.phase.emoji }} {{ status.phase.label }}</span>
+    <span class="pill pill--sky">вес в индексе {{ (weight * 100) | round | int }}%</span>
+    <span class="pill pill--mint">+{{ status.trend_7d | round(1) }} п.п. за неделю</span>
+  </div>
+
+  <div class="bar" role="img" aria-label="Восстановление {{ status.percent_int }} процентов">
+    <div class="bar__fill" style="width: {{ status.percent_int }}%"></div>
+  </div>
+
+  <section style="margin-top:1rem">
+    <h3>Что показываем</h3>
+    <ul class="soft">
+      {% for item in status.what_we_show %}<li>{{ item }}</li>{% endfor %}
+    </ul>
+  </section>
+
+  <section style="margin-top:0.5rem">
+    <h3>Текущий статус</h3>
+    {% if status.reached %}
+      <div class="alert" style="background:var(--phase-soft);border-color:transparent;margin-bottom:0.6rem">
+        <div class="row-between" style="align-items:baseline">
+          <strong>{{ status.reached.title }}</strong>
+          <span class="pill">{{ status.reached.percent }}% рубеж</span>
+        </div>
+        <p class="soft" style="margin:0.35rem 0 0">{{ status.reached.detail }}</p>
+      </div>
+    {% else %}
+      <p class="soft">Вы в начале пути: рубеж «{{ module.milestones[0].title }}» ещё впереди.</p>
+    {% endif %}
+
+    {% if status.upcoming %}
+      <p class="soft" style="margin:0">
+        <strong>Дальше:</strong> {{ status.upcoming.title }} — через
+        {{ status.hours_to_next | duration }} ({{ status.upcoming.percent }}%).
+        {% if status.next_eta %}<span class="muted">Ориентировочно {{ status.next_eta.strftime('%d.%m.%Y') }}.</span>{% endif %}
+      </p>
+    {% endif %}
+  </section>
+
+  <section style="margin-top:1rem">
+    <h3>Таймлайн</h3>
+    <ol class="timeline">
+      {% for row in timeline %}
+        {% set m = row.milestone %}
+        <li class="{% if row.reached %}is-done{% elif loop.index0 == next_index %}is-next{% endif %}">
+          <div class="timeline__when">
+            {{ m.hours | duration }}
+            {% if row.reached %}· достигнуто{% elif row.eta_hours %}· через {{ row.eta_hours | duration }}{% endif %}
+          </div>
+          <div class="timeline__title">{{ m.title }} <span class="timeline__pct">— {{ m.percent }}%</span></div>
+          <div class="soft" style="font-size:0.9rem">{{ m.detail }}</div>
+        </li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  <section style="margin-top:1rem">
+    <h3>Специфика вейпинга</h3>
+    <p class="soft">{{ status.vape_specific }}</p>
+    {% if status.ritual_note %}
+      <div class="alert alert--info">
+        <strong>Замена ритуала.</strong> {{ status.ritual_note }}
+      </div>
+    {% endif %}
+  </section>
+
+  {% if speed_notes %}
+    <section style="margin-top:1rem">
+      <h3>Поправка на ваш анамнез</h3>
+      <ul class="soft">
+        {% for note in speed_notes %}<li>{{ note }}</li>{% endfor %}
+      </ul>
+      <p class="muted" style="font-size:0.85rem;margin:0">
+        Итоговый коэффициент скорости восстановления: {{ speed_factor | round(2) }}.
+      </p>
+    </section>
+  {% endif %}
+
+  <section style="margin-top:1rem">
+    <h3>Источники</h3>
+    <ul class="src-list">
+      {% for src in citation(status.sources) %}
+        <li>
+          <span class="src-org">{{ src.org }}</span> — {{ src.title }}.<br>
+          <span class="muted">{{ src.detail }}</span><br>
+          <a href="{{ src.url }}" rel="noopener noreferrer nofollow" target="_blank">{{ src.url }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <p class="muted" style="font-size:0.85rem;margin-top:1rem">{{ MEDICAL_DISCLAIMER }}</p>
+</article>

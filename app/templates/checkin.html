@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Чек-ин — {{ APP_NAME }}{% endblock %}
+{% block body_attrs %} data-checkin{% endblock %}
+
+{% block content %}
+<div class="row-between" style="margin-bottom:1rem">
+  <div>
+    <h1 style="margin:0">Ежедневный чек-ин</h1>
+    <p class="soft" style="margin:0.25rem 0 0">{{ today.strftime('%d.%m.%Y') }} · занимает около 20 секунд</p>
+  </div>
+  <span class="pill pill--mint">Всего отмечено дней: {{ totals.checkin_days }}</span>
+</div>
+
+{% if saved %}
+  <div class="alert alert--ok" role="status">
+    <strong>Записали.</strong> Данные появятся на графике динамики. Спасибо, что отмечаете честно.
+  </div>
+{% endif %}
+
+<form method="post" action="/checkin" class="grid" style="grid-template-columns:minmax(0,1fr);gap:1rem">
+  <input type="hidden" name="local_date" value="{{ today.isoformat() }}" data-local-date>
+
+  <section class="card">
+    <h2 class="card__title">Как вы себя чувствуете</h2>
+
+    <div class="grid grid-2" style="margin-top:0.8rem">
+      <div class="field">
+        <label class="field__label" for="mood">Настроение</label>
+        <div class="range-row">
+          <input type="range" id="mood" name="mood" min="1" max="10" step="1"
+                 value="{{ checkin.mood if checkin else 7 }}" data-range-output="mood-out">
+          <output class="range-value" id="mood-out">{{ checkin.mood if checkin else 7 }}</output>
+        </div>
+        <span class="field__hint">1 — тяжело, 10 — отлично. Любое значение нормально.</span>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="craving">Тяга к вейпу</label>
+        <div class="range-row">
+          <input type="range" id="craving" name="craving" min="1" max="10" step="1"
+                 value="{{ checkin.craving if checkin else 5 }}" data-range-output="craving-out">
+          <output class="range-value" id="craving-out">{{ checkin.craving if checkin else 5 }}</output>
+        </div>
+        <span class="field__hint">
+          При высокой тяге приложение предложит дыхательную практику — это работает быстрее, чем терпеть.
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 class="card__title">Сон</h2>
+    <p class="soft" style="font-size:0.9rem">
+      Никотин дробит быстрые фазы сна, поэтому улучшение сна — один из первых заметных бонусов отказа.
+    </p>
+    <div class="grid grid-2">
+      <label class="field">
+        <span class="field__label">Сколько часов спали</span>
+        <input type="number" name="sleep_hours" min="0" max="24" step="0.5"
+               value="{{ checkin.sleep_hours if checkin else 7.5 }}">
+      </label>
+      <label class="field">
+        <span class="field__label">Качество сна</span>
+        <select name="sleep_quality">
+          {% for q, label in [(1,'1 — очень плохо'),(2,'2 — плохо'),(3,'3 — нормально'),(4,'4 — хорошо'),(5,'5 — отлично')] %}
+            <option value="{{ q }}" {% if (checkin.sleep_quality if checkin else 3) == q %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 class="card__title">Здоровые привычки</h2>
+    <div class="grid grid-3" style="margin-top:0.6rem">
+      <label class="field">
+        <span class="field__label">💧 Стаканов воды</span>
+        <input type="number" name="water_glasses" min="0" max="30" step="1"
+               value="{{ checkin.water_glasses if checkin else 0 }}">
+        <span class="field__hint">Цель — 8. Вода помогает слизистой и выведению метаболитов никотина.</span>
+      </label>
+      <label class="field">
+        <span class="field__label">🏃 Минут активности</span>
+        <input type="number" name="activity_minutes" min="0" max="600" step="5"
+               value="{{ checkin.activity_minutes if checkin else 0 }}">
+        <span class="field__hint">Кардио тренирует лёгкие и сосуды.</span>
+      </label>
+      <label class="field">
+        <span class="field__label">🌬️ Дыхательных практик</span>
+        <input type="number" name="breathing_sessions" min="0" max="50" step="1"
+               value="{{ checkin.breathing_sessions if checkin else 0 }}" data-breathing-count>
+        <span class="field__hint">Считается автоматически после практики на <a href="/breathing">странице дыхания</a>.</span>
+      </label>
+    </div>
+  </section>
+
+  <section class="card">
+    <label class="field" style="margin:0">
+      <span class="field__label">Заметка дня <span class="muted">(необязательно)</span></span>
+      <textarea name="note" placeholder="Что было триггером? Что помогло?">{{ checkin.note if checkin else '' }}</textarea>
+    </label>
+  </section>
+
+  <div class="row">
+    <button class="btn btn-primary" type="submit">Сохранить чек-ин</button>
+    <a class="btn btn-ghost" href="/dashboard">На дашборд</a>
+  </div>
+</form>
+
+{% if recent %}
+  <section class="card" style="margin-top:1.2rem">
+    <div class="card__head">
+      <h2 class="card__title">Последние отметки</h2>
+      <span class="card__hint">всего баллов: {{ recent | sum(attribute='points') }}</span>
+    </div>
+    <table class="data">
+      <thead>
+        <tr>
+          <th scope="col">Дата</th><th scope="col">Настроение</th><th scope="col">Тяга</th>
+          <th scope="col">Сон</th><th scope="col">Вода</th><th scope="col">Активность</th>
+          <th scope="col">Дыхание</th><th scope="col">Баллы</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in recent %}
+          <tr>
+            <th scope="row" style="text-transform:none;letter-spacing:0">{{ r.day.strftime('%d.%m.%Y') }}</th>
+            <td class="mono">{{ r.mood }}/10</td>
+            <td class="mono">{{ r.craving }}/10</td>
+            <td class="mono">{{ r.sleep_hours }} ч</td>
+            <td class="mono">{{ r.water_glasses }}</td>
+            <td class="mono">{{ r.activity_minutes }} мин</td>
+            <td class="mono">{{ r.breathing_sessions }}</td>
+            <td class="mono">{{ r.points }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endif %}
+
+<div class="card card--tint" style="margin-top:1.2rem">
+  <h3>Итого по привычкам</h3>
+  <div class="grid grid-4">
+    <div class="stat"><div class="stat__label">Дней отмечено</div><div class="stat__value">{{ totals.checkin_days }}</div></div>
+    <div class="stat"><div class="stat__label">Стаканов воды</div><div class="stat__value">{{ totals.water_glasses }}</div></div>
+    <div class="stat"><div class="stat__label">Минут активности</div><div class="stat__value">{{ totals.activity_minutes }}</div></div>
+    <div class="stat"><div class="stat__label">Дыхательных практик</div><div class="stat__value">{{ totals.breathing_sessions }}</div></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/checkin.js" defer></script>
+{% endblock %}

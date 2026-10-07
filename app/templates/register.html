@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Регистрация — {{ APP_NAME }}{% endblock %}
+
+{% block content %}
+<div class="wrap-narrow" style="margin-inline:auto">
+  <div class="card">
+    <h1>Регистрация</h1>
+    <p class="soft">
+      Приложение хранит только ваш анамнез и отметки самочувствия. Никакой рекламы и передачи
+      данных третьим лицам.
+    </p>
+
+    {% if errors %}
+      <div class="alert alert--error" role="alert">
+        <ul style="margin:0;padding-left:1.1rem">
+          {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <form method="post" action="/register" novalidate>
+      <input type="hidden" name="next" value="{{ next or '/onboarding' }}">
+
+      <label class="field">
+        <span class="field__label">Как к вам обращаться <span class="muted">(необязательно)</span></span>
+        <input type="text" name="display_name" value="{{ display_name or '' }}" autocomplete="nickname">
+      </label>
+
+      <label class="field">
+        <span class="field__label">Электронная почта</span>
+        <input type="email" name="email" value="{{ email or '' }}" autocomplete="email" required>
+      </label>
+
+      <label class="field">
+        <span class="field__label">Пароль</span>
+        <input type="password" name="password" autocomplete="new-password" required minlength="8">
+        <span class="field__hint">Минимум 8 символов, хотя бы одна буква и одна цифра.</span>
+      </label>
+
+      <label class="field">
+        <span class="field__label">Пароль ещё раз</span>
+        <input type="password" name="password2" autocomplete="new-password" required minlength="8">
+      </label>
+
+      <button class="btn btn-primary btn-block" type="submit">Создать аккаунт</button>
+    </form>
+
+    <p class="muted" style="margin-top:1rem">
+      Уже есть аккаунт? <a href="/login">Войти</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

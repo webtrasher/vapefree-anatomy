@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} — {{ APP_NAME }}{% endblock %}
+
+{% block content %}
+<div class="wrap-narrow" style="margin-inline:auto">
+  <div class="card center">
+    <p style="font-size:3rem;margin:0;font-weight:700;color:var(--muted)">{{ code }}</p>
+    <h1>{{ message }}</h1>
+    <p class="soft">Возможно, страница переехала или ссылка устарела.</p>
+    <div class="row" style="justify-content:center">
+      <a class="btn btn-primary" href="/">На главную</a>
+      <a class="btn btn-ghost" href="/dashboard">На дашборд</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

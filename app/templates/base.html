@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% block title %}{{ APP_NAME }} — {{ APP_TAGLINE }}{% endblock %}</title>
+  <meta name="description" content="{{ APP_TAGLINE }}. Таймлайны восстановления органов после отказа от вейпинга.">
+  <meta name="theme-color" content="#6fae90">
+  <meta name="color-scheme" content="light">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" type="image/png" href="/static/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+  <link rel="stylesheet" href="/static/css/app.css">
+  {% block head %}{% endblock %}
+</head>
+<body{% block body_attrs %}{% endblock %}>
+  <a class="skip-link" href="#main">Перейти к основному содержимому</a>
+
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="{{ '/' if user else '/login' }}">
+        <img class="brand__mark" src="/static/icons/icon-64.png" alt="" width="30" height="30" aria-hidden="true">
+        <span>
+          {{ APP_NAME }}
+          <span class="brand__sub">{{ APP_TAGLINE }}</span>
+        </span>
+      </a>
+
+      <nav class="site-nav" aria-label="Основная навигация">
+        {% if user %}
+          {% set path = request.url.path %}
+          <a href="/dashboard" {% if path == '/dashboard' %}aria-current="page"{% endif %}>Дашборд</a>
+          <a href="/checkin" {% if path == '/checkin' %}aria-current="page"{% endif %}>Чек-ин</a>
+          <a href="/breathing" {% if path == '/breathing' %}aria-current="page"{% endif %}>Дыхание</a>
+          <a href="/settings" {% if path == '/settings' %}aria-current="page"{% endif %}>Настройки</a>
+          <span class="timer-chip" data-timer-chip hidden>
+            <span aria-hidden="true">⏱</span><span data-unit="days">0</span>&nbsp;<span data-unit="label">дн.</span>
+          </span>
+          <form method="post" action="/logout" class="nowrap">
+            <button class="btn btn-ghost btn-sm" type="submit">Выйти</button>
+          </form>
+        {% else %}
+          <a href="/login">Войти</a>
+          <a class="btn btn-primary btn-sm" href="/register">Начать</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner stack">
+      <p class="disclaimer">
+        <strong>Медицинский дисклеймер.</strong> {{ MEDICAL_DISCLAIMER }}
+      </p>
+      <p class="muted" style="margin:0">
+        {{ APP_NAME }} · открытый проект · источники: ВОЗ, CDC, NHS, American Heart Association,
+        пульмонологические и нейробиологические исследования.
+      </p>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <dialog id="organ-dialog" class="dialog" aria-labelledby="organ-dialog-title">
+    <div class="dialog__body">
+      <button type="button" class="dialog__close" data-dialog-close aria-label="Закрыть окно">✕</button>
+      <div id="organ-dialog-content">
+        <p class="muted">Загрузка…</p>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="/static/js/app.js" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

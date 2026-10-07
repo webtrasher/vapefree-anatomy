@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}{{ APP_NAME }} — визуализация восстановления после отказа от вейпа{% endblock %}
+
+{% block content %}
+<section class="hero-landing">
+  <div class="stack">
+    <span class="pill pill--mint">Научно обоснованные таймлайны · ВОЗ · CDC</span>
+    <h1>Смотрите, как ваше тело восстанавливается после отказа от вейпа</h1>
+    <p class="hero-landing__lead">
+      VapeFree Anatomy показывает интерактивную анатомическую схему: лёгкие, сердце, сосуды,
+      мозг и кровь меняют цвет по мере восстановления. Каждый процент привязан к опубликованным
+      срокам — с поправкой на специфику вейпинга, где нет смол и угарного газа, но есть никотин
+      и воспаление дыхательных путей.
+    </p>
+    <div class="row">
+      <a class="btn btn-primary" href="/register">Начать бесплатно</a>
+      <a class="btn btn-ghost" href="/login">У меня есть аккаунт</a>
+    </div>
+    <p class="muted" style="margin:0">
+      Без «наказаний» за срывы. Кнопка «Я сорвался» сохраняет достигнутый прогресс.
+    </p>
+  </div>
+
+  <div class="body-stage is-scanning" style="max-width:380px;margin-inline:auto">
+    {% include "partials/body_svg.html" %}
+  </div></section>
+
+<section class="grid grid-3" style="margin-top:1.5rem">
+  <article class="card feature">
+    <span class="feature__icon" aria-hidden="true">🌬️</span>
+    <h3>Честная наука, а не запугивание</h3>
+    <p class="soft" style="margin:0">
+      Мы прямо говорим, что у вейперов нет угарного газа в крови, поэтому «кислород» — не главная
+      проблема. Зато никотин бьёт по эндотелию, а аэрозоль пропиленгликоля и глицерина раздражает
+      эпителий дыхательных путей.
+    </p>
+  </article>
+  <article class="card feature">
+    <span class="feature__icon" aria-hidden="true">🧠</span>
+    <h3>Не только никотин, но и ритуал</h3>
+    <p class="soft" style="margin:0">
+      Рука ко рту — автоматизированная привычка, которой нужно 30–90 дней, чтобы угаснуть.
+      В приложении есть раздел «Замена ритуала» с конкретными заменами.
+    </p>
+  </article>
+  <article class="card feature">
+    <span class="feature__icon" aria-hidden="true">😴</span>
+    <h3>Сон и вода в фокусе</h3>
+    <p class="soft" style="margin:0">
+      Никотин дробит быстрые фазы сна. Улучшение сна — первый немедицинский бонус, который вы
+      заметите уже на второй неделе.
+    </p>
+  </article>
+</section>
+
+<section class="card card--tint" style="margin-top:1.5rem">
+  <div class="card__head">
+    <h2 class="card__title">Что происходит на разных сроках</h2>
+    <span class="card__hint">усреднённые ориентиры</span>
+  </div>
+  <div class="grid grid-4">
+    <div class="stat phase-acute">
+      <div class="stat__label">0–7 дней</div>
+      <div class="stat__value" style="color:var(--phase-color)">🔴 Острая фаза</div>
+      <p class="stat__hint">Никотин выведен за 72 часа. Тяга, раздражительность, плохой сон — это нормально и временно.</p>
+    </div>
+    <div class="stat phase-regeneration">
+      <div class="stat__label">1–4 недели</div>
+      <div class="stat__value" style="color:var(--phase-color)">🟠 Регенерация</div>
+      <p class="stat__hint">Реснички эпителия и эндотелий начинают восстанавливаться, кровообращение улучшается.</p>
+    </div>
+    <div class="stat phase-active">
+      <div class="stat__label">1–6 месяцев</div>
+      <div class="stat__value" style="color:var(--phase-color)">🟡 Активное восстановление</div>
+      <p class="stat__hint">Лёгкие очищаются, артерии становятся эластичнее, сон и настроение выравниваются.</p>
+    </div>
+    <div class="stat phase-restored">
+      <div class="stat__label">6+ месяцев</div>
+      <div class="stat__value" style="color:var(--phase-color)">🟢 Значительное улучшение</div>
+      <p class="stat__hint">Показатели приближаются к уровню человека, который никогда не употреблял никотин.</p>
+    </div>
+  </div>
+</section>
+
+<section class="grid grid-2" style="margin-top:1.5rem">
+  <div class="card">
+    <h2>Как это работает</h2>
+    <ol class="soft">
+      <li>Заполняете короткий анамнез: дата последней затяжки, стаж, крепость жидкости, базовые параметры.</li>
+      <li>Получаете дашборд с живым таймером и анатомической схемой.</li>
+      <li>Нажимаете на орган — видите процент восстановления, что именно происходит и что будет дальше.</li>
+      <li>Раз в день отмечаете настроение, тягу, сон и воду. Трекер покажет динамику.</li>
+      <li>Если сорвались — одна кнопка. Прогресс сохраняется, таймер продолжается с сегодняшнего дня.</li>
+    </ol>
+  </div>
+  <div class="card">
+    <h2>Приватность и безопасность</h2>
+    <ul class="soft">
+      <li>Данные хранятся локально в базе приложения и не передаются третьим лицам.</li>
+      <li>Пароль хранится только в виде PBKDF2-HMAC-SHA256 хеша (240 000 итераций).</li>
+      <li>Работает как PWA: можно установить на телефон и открывать офлайн.</li>
+      <li>Поддерживаются screen reader, крупные шрифты и контрастные элементы.</li>
+    </ul>
+  </div>
+</section>
+{% endblock %}

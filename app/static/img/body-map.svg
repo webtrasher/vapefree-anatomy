@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 680" class="body-map" role="group" aria-label="Анатомическая схема восстановления" preserveAspectRatio="xMidYMid meet">
+<defs><linearGradient id="scanGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8FD3E8" stop-opacity="0"/><stop offset="55%" stop-color="#8FD3E8" stop-opacity="0.35"/><stop offset="100%" stop-color="#8FD3E8" stop-opacity="0"/></linearGradient><radialGradient id="organGlow" cx="50%" cy="50%" r="50%"><stop offset="60%" stop-color="#ffffff" stop-opacity="0"/><stop offset="100%" stop-color="#ffffff" stop-opacity="0.55"/></radialGradient></defs>
+<g class="body-base" aria-hidden="true">
+<path class="body-shape" d="M 138,372 L 134,424 L 130,476 L 128,528 L 126,578 L 126,620" fill="none" stroke="skin" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+<path class="body-shape" d="M 182,372 L 186,424 L 190,476 L 192,528 L 194,578 L 194,620" fill="none" stroke="skin" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse class="body-shape" cx="124" cy="632" rx="21" ry="11" fill="skin"/>
+<ellipse class="body-shape" cx="196" cy="632" rx="21" ry="11" fill="skin"/>
+<path class="body-shape" d="M 114,148 L 96,172 L 82,210 L 74,252 L 68,300 L 64,340" fill="none" stroke="skin" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+<path class="body-shape" d="M 206,148 L 224,172 L 238,210 L 246,252 L 252,300 L 256,340" fill="none" stroke="skin" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse class="body-shape" cx="63" cy="350" rx="11" ry="13" fill="skin"/>
+<ellipse class="body-shape" cx="257" cy="350" rx="11" ry="13" fill="skin"/>
+<path class="body-shape" d="M 147,98 L 146,128 L 174,128 L 173,98 Z" fill="skin"/>
+<path class="body-shape" d="M 160,116 C 138,116 116,122 104,132 C 97,140 95,155 97,172 C 101,204 110,240 112,282 C 113,312 106,336 104,356 C 103,369 107,378 114,380 L 206,380 C 213,378 217,369 216,356 C 214,336 207,312 208,282 C 210,240 219,204 223,172 C 225,155 223,140 216,132 C 204,122 182,116 160,116 Z" fill="skin"/>
+<ellipse class="body-shape" cx="160" cy="64" rx="38" ry="47" fill="skin"/>
+<ellipse class="body-shape" cx="122" cy="68" rx="6.5" ry="11" fill="skin"/>
+<ellipse class="body-shape" cx="198" cy="68" rx="6.5" ry="11" fill="skin"/>
+</g>
+<g class="body-organs">
+<g class="organ" data-organ="vessels" role="button" tabindex="0" aria-label="Сосуды и эндотелий">
+<title>Сосуды и эндотелий</title>
+<path class="organ-shape" d="M 158,205 L 157,240 L 154,272 L 152,300" fill="none" stroke="organ" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path class="organ-shape" d="M 148,160 L 126,168 L 106,190 L 92,220 L 78,264 L 68,316 L 64,340" fill="none" stroke="organ" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path class="organ-shape" d="M 172,160 L 194,168 L 214,190 L 228,220 L 242,264 L 252,316 L 256,340" fill="none" stroke="organ" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path class="organ-shape" d="M 152,300 L 146,344 L 138,392 L 133,448 L 130,512 L 128,578 L 127,610" fill="none" stroke="organ" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path class="organ-shape" d="M 168,300 L 174,344 L 182,392 L 187,448 L 190,512 L 192,578 L 193,610" fill="none" stroke="organ" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g class="organ" data-organ="lungs" role="button" tabindex="0" aria-label="Лёгкие и дыхательные пути">
+<title>Лёгкие и дыхательные пути</title>
+<path class="organ-shape" d="M 151,148 C 139,136 117,141 109,165 C 101,189 105,224 116,244 C 125,260 145,258 150,241 C 153,229 151,190 151,148 Z" fill="organ" stroke="skin" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path class="organ-shape" d="M 169.0 148.0 C 181.0 136.0 203.0 141.0 211.0 165.0 C 219.0 189.0 215.0 224.0 204.0 244.0 C 195.0 260.0 175.0 258.0 170.0 241.0 C 167.0 229.0 169.0 190.0 169.0 148.0 Z" fill="organ" stroke="skin" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<g class="organ" data-organ="brain" role="button" tabindex="0" aria-label="Мозг и нервная система">
+<title>Мозг и нервная система</title>
+<path class="organ-shape" d="M 160,31 C 150,26 139,30 134,40 C 129,50 131,62 138,68 C 143,72 151,71 156,67 C 158,65 162,65 164,67 C 169,71 177,72 182,68 C 189,62 191,50 186,40 C 181,30 170,26 160,31 Z" fill="organ" stroke="skin" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path class="organ-shape" d="M 160,31 L 160,50 L 160,67" fill="none" stroke="organ-detail" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+<path class="organ-shape" d="M 139,42 L 145,51 L 141,63" fill="none" stroke="organ-detail" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path class="organ-shape" d="M 150,37 L 153,50 L 149,65" fill="none" stroke="organ-detail" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path class="organ-shape" d="M 181,42 L 175,51 L 179,63" fill="none" stroke="organ-detail" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path class="organ-shape" d="M 170,37 L 167,50 L 171,65" fill="none" stroke="organ-detail" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g class="organ" data-organ="blood" role="button" tabindex="0" aria-label="Кровь и кислород">
+<title>Кровь и кислород</title>
+<path class="organ-shape" d="M 78.0,307.5 C 81.1,311.6 86.5,316.7 86.5,319.7 C 86.5,323.3 82.7,324.5 78.0,324.5 C 73.3,324.5 69.5,323.3 69.5,319.7 C 69.5,316.7 74.9,311.6 78.0,307.5 Z" fill="none"/>
+<path class="organ-shape" d="M 242.0,307.5 C 245.1,311.6 250.5,316.7 250.5,319.7 C 250.5,323.3 246.7,324.5 242.0,324.5 C 237.3,324.5 233.5,323.3 233.5,319.7 C 233.5,316.7 238.9,311.6 242.0,307.5 Z" fill="none"/>
+<path class="organ-shape" d="M 134.0,540.0 C 136.9,543.8 142.0,548.6 142.0,551.5 C 142.0,554.9 138.4,556.0 134.0,556.0 C 129.6,556.0 126.0,554.9 126.0,551.5 C 126.0,548.6 131.1,543.8 134.0,540.0 Z" fill="none"/>
+<path class="organ-shape" d="M 186.0,540.0 C 188.9,543.8 194.0,548.6 194.0,551.5 C 194.0,554.9 190.4,556.0 186.0,556.0 C 181.6,556.0 178.0,554.9 178.0,551.5 C 178.0,548.6 183.1,543.8 186.0,540.0 Z" fill="none"/>
+</g>
+<g class="organ" data-organ="mouth" role="button" tabindex="0" aria-label="Вкус, обоняние и оральный ритуал">
+<title>Вкус, обоняние и оральный ритуал</title>
+<path class="organ-shape" d="M 160,112 L 160,124 L 160,136" fill="none" stroke="organ" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse class="organ-shape" cx="160" cy="99" rx="15" ry="7" fill="organ"/>
+<ellipse class="organ-shape" cx="160" cy="86" rx="4.5" ry="3.5" fill="organ"/>
+</g>
+<g class="organ" data-organ="heart" role="button" tabindex="0" aria-label="Сердце">
+<title>Сердце</title>
+<path class="organ-shape" d="M 160,207 C 147,196 141,187 141,178 C 141,169 146,164 153,164 C 158,164 160,168 160,172 C 160,168 162,164 167,164 C 174,164 179,169 179,178 C 179,187 173,196 160,207 Z" fill="organ" stroke="skin" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+</g>
+<g class="scan-overlay" aria-hidden="true" pointer-events="none"><rect class="scan-bar" x="-20" y="-60" width="360" height="60" fill="url(#scanGrad)"/></g>
+</svg>
